@@ -1,439 +1,267 @@
-# AI_FINANCE_FACTORY
+# AI_FINANCE_FACTORY — PROJECT STATE
 
-## PROJECT STATE
+## Общий статус проекта
 
-Last Updated: 2026-06-21
+Проект находится в стадии активной разработки.
+
+Архитектура утверждена и считается закрытой.
+
+Новые архитектурные решения допускаются только при обнаружении реальной технической проблемы.
 
 ---
 
-# PROJECT OVERVIEW
+# Финальная цель проекта
 
-AI_FINANCE_FACTORY is an automated content production system for affiliate financial offers.
-
-Pipeline:
+Построить автономный контентный конвейер для финансовых офферов:
 
 Offer
+→ Research
 → Article
-→ Pinterest Content
-→ Pins
+→ HTML
+→ Pinterest
+→ Analytics
 → Reports
 
-Goal:
+---
 
-One affiliate offer should be transformed into multiple SEO articles, Pinterest articles, Pinterest pins and reports through a controlled automated pipeline.
+# Phase 0 — Infrastructure
+
+Статус: ✅ DONE
+
+Результат:
+
+* Git и репозиторий инициализированы
+* Virtual Environment настроен
+* requirements.txt создан
+* pytest настроен
+* базовая структура проекта создана
+
+Выполнено:
+
+* .gitignore
+* requirements.txt
+* pytest.ini
+* структура каталогов
 
 ---
 
-# CURRENT STATUS
+# Phase 1 — Foundation Layer
 
-Phase 1: COMPLETE ✅
+Статус: ✅ DONE
 
-Phase 2: NOT STARTED ⏳
+Цель:
 
-Phase 3: NOT STARTED ⏳
+Создать базовые строительные блоки системы.
 
-Phase 4: NOT STARTED ⏳
+Реализовано:
 
----
+agents/config.py
 
-# COMPLETED WORK
+Ответственность:
 
-## Phase 1 — Core Foundation
+* пути проекта
+* директории данных
+* переменные окружения
+* настройки системы
 
-Status: COMPLETE
+agents/shared_models.py
 
-### Implemented Components
+Ответственность:
 
-#### agents/shared_models.py
-
-Implemented Pydantic models:
-
+* Pydantic-модели
 * Offer
-* Article
-* PipelineHistoryItem
-* PipelineState
 * LockFile
+* PipelineState
+
+agents/lock_manager.py
+
+Ответственность:
+
+* acquire_lock()
+* release_lock()
+* cleanup_expired_locks()
+
+agents/idempotency.py
+
+Ответственность:
+
+* защита от повторной обработки
+
+agents/offer_loader.py
+
+Ответственность:
+
+* загрузка Offer из Markdown/YAML
 
 ---
 
-#### agents/offer_loader.py
+# Тесты Foundation Layer
 
-Implemented.
+Статус: ✅ PASSED
 
-Responsibilities:
+Пройдены:
 
-* Load offer markdown files
-* Extract YAML metadata
-* Validate data using Offer model
-* Return Offer object
+* test_models.py
+* test_lock_manager.py
+* test_idempotency.py
+* test_offer_loader.py
 
----
+Текущий результат:
 
-#### agents/idempotency.py
-
-Implemented.
-
-Responsibilities:
-
-* Detect already processed offers
-* Prevent duplicate article generation
-
-Main method:
-
-```python
-article_exists(offer_id)
-```
-
----
-
-#### agents/lock_manager.py
-
-Implemented.
-
-Responsibilities:
-
-* Create lock files
-* Prevent parallel execution
-* Release locks
-* Remove expired locks
-
-Methods:
-
-```python
-acquire_lock()
-release_lock()
-cleanup_expired_locks()
-```
-
----
-
-# TESTS
-
-Implemented:
-
-* tests/test_models.py
-* tests/test_offer_loader.py
-* tests/test_idempotency.py
-* tests/test_lock_manager.py
-
-Current Result:
-
-```text
 4 passed
-```
 
 ---
 
-# DATA STRUCTURE
+# Phase 2 — Pipeline Core
 
-Current project structure:
+Статус: ⏳ IN PROGRESS
 
-```text
-agents/
-data/
-tests/
-templates/
-scripts/
-```
+Следующий этап разработки.
 
----
+Цель:
 
-## Existing Data Directories
+Построить управляющий слой пайплайна.
 
-```text
-data/Offers/
-data/Articles/
-data/Pipeline_Status/
-data/Logs/
-```
+Необходимо реализовать:
 
----
+agents/pipeline_manager.py
 
-## Existing Offer
+Функции:
 
-```text
-data/Offers/offer_alfa_kids.md
-```
+* create_pipeline_state()
+* load_pipeline_state()
+* save_pipeline_state()
+* update_status()
+* append_history()
 
-Contains:
+Также необходимо создать:
 
-```yaml
-id:
-name:
-bank:
-offer_url:
-affiliate_url:
-status:
-created_at:
-```
+tests/test_pipeline_manager.py
+
+После этого создать:
+
+scripts/pipeline.py
+
+Команды:
+
+python scripts/pipeline.py run --offer offer_test
+
+python scripts/pipeline.py doctor
 
 ---
 
-# ARCHITECTURE RULES
+# Цель завершения Phase 2
 
-## Rule 1
+После выполнения команды:
 
-Offer files are the source of truth.
+python scripts/pipeline.py run --offer offer_test
 
-Never generate offer files automatically.
+должны автоматически создаваться:
 
----
+data/Articles/drafts/article_001.md
 
-## Rule 2
+data/Articles/html/article_001.html
 
-All offer loading must use:
+data/Pipeline_Status/article_001.json
 
-```python
-OfferLoader.load()
-```
+Даже если контент пока является заглушкой.
 
----
+Главная цель:
 
-## Rule 3
-
-All entities must be represented by Pydantic models.
-
-Avoid raw dictionaries whenever possible.
+Проверить работоспособность полного конвейера.
 
 ---
 
-## Rule 4
+# Phase 3 — Content Layer
 
-All generation operations must be idempotent.
+Статус: 🔒 LOCKED
 
-Before creating content:
+Не начинать до полного завершения Phase 2.
 
-```python
-IdempotencyManager.article_exists()
-```
+Планируемые модули:
 
-must be checked.
+agents/content_generator.py
 
----
+agents/template_engine.py
 
-## Rule 5
+agents/html_renderer.py
 
-All write operations must use locking.
+Цель:
 
-Before processing:
-
-```python
-acquire_lock()
-```
-
-After processing:
-
-```python
-release_lock()
-```
-
----
-
-## Rule 6
-
-Phase 1 architecture is considered stable.
-
-Do not refactor existing Phase 1 components unless a confirmed bug exists.
-
----
-
-# NEXT TARGET
-
-## Phase 2 — Article Generation
-
-Status: NOT STARTED
-
----
-
-## To Implement
-
-### agents/article_generator.py
-
-Input:
-
-```python
 Offer
-```
-
-Output:
-
-```python
-Article
-```
-
-Responsibilities:
-
-* Generate article draft
-* Save markdown file
-* Create Article object
-* Update PipelineState
+→ Markdown
+→ HTML
 
 ---
 
-### Prompt Templates
+# Phase 4 — AI Layer
 
-Create:
+Статус: 🔒 LOCKED
 
-```text
-templates/article_prompt.md
-templates/seo_prompt.md
-templates/pinterest_prompt.md
-```
+Не начинать до полного завершения Phase 3.
 
----
+Планируемые интеграции:
 
-### Draft Storage
+* Gemini
+* OpenAI
+* Claude
 
-Directory:
+Цель:
 
-```text
-data/Articles/drafts/
-```
+Генерация реального контента.
 
 ---
 
-### HTML Storage
+# Phase 5 — Pinterest Layer
 
-Directory:
+Статус: 🔒 LOCKED
 
-```text
-data/Articles/html/
-```
+Планируемые модули:
 
----
+* pin_generator.py
+* image_generator.py
+* pinterest_publisher.py
 
-### Pipeline Integration
+Цель:
 
-Required states:
-
-```text
-init
-processing
-success
-failed
-```
+Автоматическая публикация контента в Pinterest.
 
 ---
 
-### Tests
+# Phase 6 — Analytics Layer
 
-Create:
+Статус: 🔒 LOCKED
 
-```text
-tests/test_article_generator.py
-```
+Планируемые функции:
 
-Required checks:
-
-* article generated
-* file saved
-* pipeline updated
-* idempotency respected
+* CTR
+* EPC
+* RPC
+* ROI
+* отчёты
 
 ---
 
-# PHASE 3 — PINTEREST FACTORY
+# Правила проекта
 
-Status: NOT STARTED
+1. Не перескакивать через фазы.
 
-Planned:
+2. Каждый новый модуль сначала покрывается тестами.
 
-* Pinterest titles
-* Pinterest descriptions
-* Pinterest keywords
-* Pinterest image prompts
-* Pinterest content packages
+3. Любой этап считается завершённым только после прохождения pytest.
 
-Output:
+4. После завершения каждой фазы обновлять PROJECT_STATE.md.
 
-```text
-Title
-Description
-Keywords
-Image Prompt
-```
+5. NEXT_TASKS.md всегда содержит только ближайшие задачи.
 
 ---
 
-# PHASE 4 — AUTOMATION
+# Последние завершённые этапы
 
-Status: NOT STARTED
+✅ Infrastructure
 
-Planned:
+✅ Foundation Layer
 
-* Orchestrator
-* Retry system
-* Human review workflow
-* Logging
-* Metrics
-* Reporting
+Текущая активная задача:
 
-Pipeline:
-
-```text
-Offer
- ↓
-Article
- ↓
-Pinterest Content
- ↓
-Pins
- ↓
-Report
-```
-
----
-
-# FORBIDDEN CHANGES
-
-Do not:
-
-* Replace Pydantic
-* Replace YAML offer format
-* Rewrite OfferLoader
-* Rewrite LockManager
-* Change Offer schema
-* Change folder structure
-
-Unless explicitly requested.
-
----
-
-# DEFINITION OF DONE — PHASE 2
-
-Given:
-
-```text
-data/Offers/offer_alfa_kids.md
-```
-
-System must:
-
-1. Load offer
-2. Generate article
-3. Save article draft
-4. Create Article object
-5. Update pipeline state
-6. Pass tests
-
-Success criteria:
-
-```text
-pytest
-
-5+ tests passing
-```
-
----
-
-# CURRENT PROJECT HEALTH
-
-Architecture: Stable ✅
-
-Tests: Passing ✅
-
-Git Repository: Initialized ✅
-
-Phase 1: Complete ✅
-
-Ready For Phase 2: YES ✅
+➡ Phase 2 — Pipeline Core
