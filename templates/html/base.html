@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ meta_description }}">
+    <meta name="author" content="myfinq.xyz">
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "{{ title }}",
+        "description": "{{ meta_description }}",
+        "author": {
+            "@type": "Organization",
+            "name": "myfinq.xyz"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "myfinq.xyz"
+        },
+        "datePublished": "{{ published_date }}",
+        "dateModified": "{{ modified_date }}"
+    }
+    </script>
+</head>
+<body>
+    <article>
+        <header>
+            <h1>{{ title }}</h1>
+        </header>
+        <div class="content">
+            {{ content | safe }}
+        </div>
+        <footer>
+            {% if cta_button %}
+            <a href="{{ cta_button.href }}" class="cta-button">{{ cta_button.text }}</a>
+            {% endif %}
+        </footer>
+    </article>
+</body>
+</html>

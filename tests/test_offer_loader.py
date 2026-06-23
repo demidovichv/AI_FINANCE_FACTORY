@@ -4,7 +4,7 @@ from agents.offer_loader import OfferLoader
 def test_load_offer():
 
     offer = OfferLoader.load(
-        "data/Offers/offer_alfa_kids.md"
+        "Obsidian/Offers/offer_alfa_kids.md"
     )
 
     assert offer.id == "offer_alfa_kids"

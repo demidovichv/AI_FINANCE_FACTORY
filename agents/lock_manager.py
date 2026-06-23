@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from agents.shared_models import LockFile
@@ -47,7 +47,7 @@ class LockManager:
 
                 if (
                     existing_lock.expires_at >
-                    datetime.utcnow()
+                    datetime.now(timezone.utc)
                 ):
                     return (
                         False,
@@ -121,7 +121,7 @@ class LockManager:
 
                 if (
                     lock.expires_at <
-                    datetime.utcnow()
+                    datetime.now(timezone.utc)
                 ):
                     lock_file.unlink()
                     removed += 1

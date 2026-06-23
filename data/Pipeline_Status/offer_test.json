@@ -1,0 +1,15 @@
+{
+  "entity_id": "offer_test",
+  "entity_type": "offer",
+  "created_at": "2026-06-23T09:45:33.017000Z",
+  "updated_at": "2026-06-23T09:45:33.017000Z",
+  "current_stage": "init",
+  "status": "pending",
+  "parent_ids": [],
+  "child_ids": [],
+  "retry_count": 0,
+  "max_retries": 4,
+  "last_error": null,
+  "human_review_needed": false,
+  "history": []
+}
