@@ -1,0 +1,147 @@
+# Hermes Desktop Configuration for AI_FINANCE_FACTORY
+# Описание задач, видимых в интерфейсе Hermes
+
+version: "1.0"
+project: AI_FINANCE_FACTORY
+
+# ------------------------------------------------------------------
+# Задачи (Tasks)
+# ------------------------------------------------------------------
+tasks:
+  task_full_pipeline:
+    name: "Run Full Content Pipeline"
+    name_ru: "Запустить полный конвейер"
+    description: "Generates keywords, clusters, articles, pins, telegram posts, youtube scripts, emails for a given offer"
+    command: "python hermes_tasks.py run {offer_id}"
+    parameters:
+      - name: "offer_id"
+        type: "string"
+        required: true
+        description: "ID оффера из Obsidian/Offers/ (например, offer_alfa_kids)"
+        default: ""
+    working_directory: "."
+    shell: false
+    timeout_seconds: 3600
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+    env:
+      - "PYTHONPATH=."
+    tags:
+      - "pipeline"
+      - "content-generation"
+
+  task_publish_queue:
+    name: "Publish Approved Content"
+    name_ru: "Опубликовать одобренный контент"
+    description: "Processes Review Queue: approves pending articles (GitHub Pages) and pins (Pinterest)"
+    command: "python hermes_tasks.py publish"
+    parameters: []
+    working_directory: "."
+    shell: false
+    timeout_seconds: 1800
+    retry:
+      max_attempts: 2
+      backoff: "linear"
+    env:
+      - "PYTHONPATH=."
+    tags:
+      - "publishing"
+      - "review-queue"
+      - "human-review"
+
+  task_keyword_research:
+    name: "Keyword Research"
+    name_ru: "Исследование ключевых слов"
+    description: "Generates keyword list for a given offer"
+    command: "python -c \"from agents.hermes_tasks import HermesTaskRunner; import sys; runner = HermesTaskRunner(); report = runner.run_full_pipeline(sys.argv[1]); print(report)\" {offer_id}"
+    parameters:
+      - name: "offer_id"
+        type: "string"
+        required: true
+        description: "ID оффера"
+    working_directory: "."
+    shell: true
+    timeout_seconds: 600
+    tags:
+      - "keyword-research"
+
+  task_review_list:
+    name: "List Pending Reviews"
+    name_ru: "Список на проверку"
+    description: "Shows all entities pending human review in Review Queue"
+    command: "python -c \"from agents.review_manager import ReviewManager; import json, glob; [print(json.dumps(json.loads(p), ensure_ascii=False)) for p in glob.glob('data/Review_Queue/*/*.json')]\""
+    parameters: []
+    working_directory: "."
+    shell: true
+    timeout_seconds: 60
+    tags:
+      - "review"
+      - "listing"
+
+# ------------------------------------------------------------------
+# Канбан-доска (Kanban)
+# ------------------------------------------------------------------
+kanban:
+  columns:
+    - id: "researching"
+      name: "Исследование"
+      name_en: "Researching"
+      color: "#3b82f6"
+    - id: "writing"
+      name: "Написание"
+      name_en: "Writing"
+      color: "#f59e0b"
+    - id: "review"
+      name: "Проверка"
+      name_en: "In Review"
+      color: "#8b5cf6"
+    - id: "rendering"
+      name: "Рендеринг"
+      name_en: "Rendering"
+      color: "#06b6d4"
+    - id: "ready"
+      name: "Готово к публикации"
+      name_en: "Ready to Publish"
+      color: "#22c55e"
+    - id: "published"
+      name: "Опубликовано"
+      name_en: "Published"
+      color: "#10b981"
+    - id: "failed"
+      name: "Ошибка"
+      name_en: "Failed"
+      color: "#ef4444"
+
+  # Маппинг статусов PipelineState -> колонки канбана
+  status_mapping:
+    "pending": "researching"
+    "processing": "writing"
+    "fact_checking": "review"
+    "waiting_review": "review"
+    "rendered": "ready"
+    "success": "published"
+    "failed": "failed"
+
+  # Как обновлять статус (через Hermes API или напрямую через PipelineState)
+  update_method: "pipeline_state_file"
+  pipeline_status_path: "data/Pipeline_Status/{entity_id}.json"
+
+# ------------------------------------------------------------------
+# LLM Integration (Hermes AIAgent)
+# ------------------------------------------------------------------
+llm:
+  # Hermes предоставляет экземпляр AIAgent, который мы передаем в конструкторы
+  integration_point: "HermesTaskRunner(llm_client=hermes_ai_agent)"
+  # В Hermes Desktop это будет выглядеть как:
+  #   runner = HermesTaskRunner(llm_client=self.ai_agent)
+  fallback: "mock"  # если llm_client не передан — используется заглушка
+
+# ------------------------------------------------------------------
+# Логирование
+# ------------------------------------------------------------------
+logging:
+  level: "INFO"
+  file: "data/Logs/hermes_tasks.log"
+  console: true
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
