@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
+from agents.article_generator import ArticleGenerator
 from agents.cluster_manager import ClusterManager
 from agents.email_sequence_generator import EmailSequenceGenerator
 from agents.fact_checker import FactChecker
@@ -144,7 +145,7 @@ class HermesTaskRunner:
                     try:
                         import json
                         data = json.loads(status_file.read_text(encoding="utf-8"))
-                        if data.get("status") != "pending":
+                        if data.get("status") != "approved":
                             continue
                         entity_id = data["entity_id"]
                         entity_type = data["entity_type"]

@@ -1,0 +1,11 @@
+---
+id: kw_4db83ebd
+text: оформить Альфа-Банк Детская карта Альфа-Банк
+search_volume: 500
+difficulty: 20
+intent: transactional
+cluster_id: null
+created_at: null
+---
+
+

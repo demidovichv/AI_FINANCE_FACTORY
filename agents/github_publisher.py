@@ -34,12 +34,13 @@ class GitHubPublisher:
             [f.stem for f in html_files]
         )
         
-        lock_acquired = False
+        locked_id = None
         for html_file in html_files:
             acquired, msg = self.lock_manager.acquire_lock(
                 "article", html_file.stem, "github_publisher"
             )
             if acquired:
+                locked_id = html_file.stem
                 lock_acquired = True
                 break
         
@@ -60,7 +61,8 @@ class GitHubPublisher:
         except Exception:
             raise
         finally:
-            self.lock_manager.release_lock("article", "github_publisher")
+            if locked_id:
+                self.lock_manager.release_lock("article", locked_id)
         
         return published
 

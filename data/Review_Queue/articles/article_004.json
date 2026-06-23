@@ -1,0 +1,10 @@
+{
+  "entity_id": "article_004",
+  "entity_type": "article",
+  "status": "approved",
+  "submitted_at": "2026-06-23T13:35:05.241198+00:00",
+  "reviewed_at": "2026-06-23T13:43:35.473053+00:00",
+  "rejection_reason": null,
+  "source_path": "data\\Review_Queue\\articles\\article_004.html",
+  "output_path": "data\\Exports\\Ready_To_Publish\\article_004.html"
+}

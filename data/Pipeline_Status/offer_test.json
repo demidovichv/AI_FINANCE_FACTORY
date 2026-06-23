@@ -1,8 +1,8 @@
 {
   "entity_id": "offer_test",
   "entity_type": "offer",
-  "created_at": "2026-06-23T11:57:28.748661Z",
-  "updated_at": "2026-06-23T11:57:28.748661Z",
+  "created_at": "2026-06-23T14:04:40.958373Z",
+  "updated_at": "2026-06-23T14:04:40.958373Z",
   "current_stage": "init",
   "status": "pending",
   "parent_ids": [],

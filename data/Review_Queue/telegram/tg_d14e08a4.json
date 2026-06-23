@@ -1,0 +1,10 @@
+{
+  "entity_id": "tg_d14e08a4",
+  "entity_type": "telegram_post",
+  "status": "approved",
+  "submitted_at": "2026-06-23T13:35:05.382754+00:00",
+  "reviewed_at": "2026-06-23T14:04:40.213866+00:00",
+  "rejection_reason": null,
+  "source_path": "data\\Review_Queue\\telegram\\tg_d14e08a4.md",
+  "output_path": "data\\Exports\\Ready_To_Publish\\tg_d14e08a4.md"
+}

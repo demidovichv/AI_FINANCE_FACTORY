@@ -45,3 +45,21 @@ def test_publish_empty_ready_dir(temp_roots) -> None:
     )
     published = publisher.publish_approved_articles()
     assert published == []
+
+
+def test_publish_releases_lock(temp_roots) -> None:
+    ready, blog_repo, tmp_path = temp_roots
+    html_file = ready / "article_001.html"
+    html_file.write_text("<html><body>Article 1</body></html>", encoding="utf-8")
+    
+    lock_dir = tmp_path / ".locks"
+    lm = LockManager(lock_dir=str(lock_dir))
+    publisher = GitHubPublisher(
+        ready_dir=str(ready),
+        blog_repo_dir=str(blog_repo),
+        lock_manager=lm
+    )
+    
+    published = publisher.publish_approved_articles()
+    assert "article_001" in published
+    assert not (lock_dir / "article_001.lock").exists()

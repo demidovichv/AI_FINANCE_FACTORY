@@ -1,0 +1,11 @@
+---
+id: kw_6dc2a14d
+text: как получить Детская карта Альфа-Банк
+search_volume: 650
+difficulty: 30
+intent: transactional
+cluster_id: null
+created_at: null
+---
+
+

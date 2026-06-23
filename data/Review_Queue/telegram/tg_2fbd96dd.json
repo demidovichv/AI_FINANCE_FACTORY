@@ -1,0 +1,10 @@
+{
+  "entity_id": "tg_2fbd96dd",
+  "entity_type": "telegram_post",
+  "status": "approved",
+  "submitted_at": "2026-06-23T13:35:05.350751+00:00",
+  "reviewed_at": "2026-06-23T14:04:40.189861+00:00",
+  "rejection_reason": null,
+  "source_path": "data\\Review_Queue\\telegram\\tg_2fbd96dd.md",
+  "output_path": "data\\Exports\\Ready_To_Publish\\tg_2fbd96dd.md"
+}

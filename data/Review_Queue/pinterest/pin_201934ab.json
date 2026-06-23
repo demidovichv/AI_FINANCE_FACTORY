@@ -1,0 +1,10 @@
+{
+  "entity_id": "pin_201934ab",
+  "entity_type": "pin",
+  "status": "approved",
+  "submitted_at": "2026-06-23T13:35:05.333744+00:00",
+  "reviewed_at": "2026-06-23T14:04:40.129980+00:00",
+  "rejection_reason": null,
+  "source_path": "data\\Review_Queue\\pinterest\\pin_201934ab.md",
+  "output_path": "data\\Exports\\Ready_To_Publish\\pin_201934ab.md"
+}
