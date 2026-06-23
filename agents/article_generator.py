@@ -8,6 +8,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from agents.idempotency import IdempotencyManager
+from agents.knowledge_memory_agent import KnowledgeMemoryAgent
 from agents.lock_manager import LockManager
 from agents.obsidian_parser import exists, read, write
 from agents.shared_models import Article, Cluster, Keyword, Offer
@@ -18,11 +19,13 @@ class ArticleGenerator:
         self,
         llm_client=None,
         lock_manager: Optional[LockManager] = None,
-        idempotency: Optional[IdempotencyManager] = None
+        idempotency: Optional[IdempotencyManager] = None,
+        memory: Optional[KnowledgeMemoryAgent] = None
     ):
         self.llm_client = llm_client
         self.lock_manager = lock_manager or LockManager()
         self.idempotency = idempotency or IdempotencyManager()
+        self.memory = memory or KnowledgeMemoryAgent()
 
     def generate(
         self,
@@ -30,6 +33,13 @@ class ArticleGenerator:
         keyword: Keyword,
         cluster: Optional[Cluster] = None
     ) -> Article:
+        uniqueness = self.memory.check_uniqueness(keyword.text)
+        if uniqueness["status"] == "duplicate":
+            import logging
+            logging.getLogger(__name__).warning(
+                "Uniqueness check: %s", uniqueness["message"]
+            )
+        
         if self.idempotency.article_exists(offer.id):
             existing = self._find_existing_article(offer, keyword)
             if existing:
