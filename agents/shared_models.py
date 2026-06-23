@@ -161,6 +161,8 @@ class Pin(BaseModel):
 
     created_at: Optional[date] = None
 
+    pinterest_url: Optional[str] = None
+
     obsidian_path: Optional[str] = None
 
 
