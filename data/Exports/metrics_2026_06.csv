@@ -1,0 +1,11 @@
+entity_id,entity_type,views,clicks,saves,avg_time_sec
+article_001,article,1200,350,90,145.0
+article_002,article,800,210,45,95.5
+article_003,article,2100,480,130,190.2
+article_004,article,500,120,25,60.0
+article_005,article,1600,400,110,155.5
+article_006,article,300,60,10,35.0
+article_007,article,950,230,55,110.0
+pin_001,pin,3400,180,420,0.0
+pin_002,pin,2800,150,350,0.0
+pin_003,pin,1500,90,200,0.0
