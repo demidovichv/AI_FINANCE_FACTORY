@@ -1,0 +1,142 @@
+from __future__ import annotations
+
+import csv
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
+from agents.lock_manager import LockManager
+from agents.obsidian_parser import write
+from agents.shared_models import Article, Pin, Report
+
+
+class ContentMetrics(BaseModel):
+    entity_id: str
+    entity_type: str
+    views: int = 0
+    clicks: int = 0
+    saves: int = 0
+    avg_time_sec: float = 0.0
+    score: float = 0.0
+
+
+class AnalyticsAgent:
+    def __init__(self, lock_manager: Optional[LockManager] = None, metrics_dir: str = "data/Exports"):
+        self.lock_manager = lock_manager or LockManager()
+        self.metrics_dir = Path(metrics_dir)
+        self.metrics_dir.mkdir(parents=True, exist_ok=True)
+
+    def collect_metrics(self) -> List[ContentMetrics]:
+        metrics: List[ContentMetrics] = []
+        for csv_path in self.metrics_dir.glob("metrics_*.csv"):
+            try:
+                with csv_path.open(encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        metrics.append(
+                            ContentMetrics(
+                                entity_id=row.get("entity_id", ""),
+                                entity_type=row.get("entity_type", "article"),
+                                views=int(row.get("views", 0) or 0),
+                                clicks=int(row.get("clicks", 0) or 0),
+                                saves=int(row.get("saves", 0) or 0),
+                                avg_time_sec=float(row.get("avg_time_sec", 0) or 0),
+                            )
+                        )
+            except Exception:
+                continue
+        for m in metrics:
+            m.score = self._compute_score(m)
+        return metrics
+
+    def generate_report(self, metrics: Optional[List[ContentMetrics]] = None) -> Report:
+        if metrics is None:
+            metrics = self.collect_metrics()
+        articles = [m for m in metrics if m.entity_type == "article"]
+        pins = [m for m in metrics if m.entity_type == "pin"]
+        articles_sorted = sorted(articles, key=lambda m: m.score, reverse=True)
+        pins_sorted = sorted(pins, key=lambda m: m.score, reverse=True)
+        top5_articles = articles_sorted[:5]
+        bottom5_articles = sorted(articles, key=lambda m: m.score)[:5]
+        top5_pins = pins_sorted[:5]
+        now = datetime.now(timezone.utc)
+        report_id = f"report_{now.strftime('%Y%m%d')}"
+        lines = [
+            f"# Monthly Content Report — {now.strftime('%B %Y')}",
+            "",
+            "## Summary",
+            f"- Total articles analyzed: {len(articles)}",
+            f"- Total pins analyzed: {len(pins)}",
+            f"- Report generated: {now.isoformat()}",
+            "",
+            "## Top Performing Content (Articles)",
+            "| Rank | Entity ID | Views | Clicks | Avg Time (s) | Score |",
+            "|------|-----------|-------|--------|---------------|-------|",
+        ]
+        for i, m in enumerate(top5_articles, start=1):
+            lines.append(f"| {i} | {m.entity_id} | {m.views} | {m.clicks} | {m.avg_time_sec:.1f} | {m.score:.2f} |")
+        lines += [
+            "",
+            "## Weakest Content (Articles)",
+            "| Rank | Entity ID | Views | Clicks | Avg Time (s) | Score |",
+            "|------|-----------|-------|--------|---------------|-------|",
+        ]
+        for i, m in enumerate(bottom5_articles, start=1):
+            lines.append(f"| {i} | {m.entity_id} | {m.views} | {m.clicks} | {m.avg_time_sec:.1f} | {m.score:.2f} |")
+        if top5_pins:
+            lines += [
+                "",
+                "## Top Performing Pins",
+                "| Rank | Entity ID | Saves | Clicks | Score |",
+                "|------|-----------|-------|--------|-------|",
+            ]
+            for i, m in enumerate(top5_pins, start=1):
+                lines.append(f"| {i} | {m.entity_id} | {m.saves} | {m.clicks} | {m.score:.2f} |")
+        lines += [
+            "",
+            "## Recommendations",
+        ]
+        if top5_articles:
+            best = top5_articles[0]
+            lines.append(f"- Best article: {best.entity_id} (score {best.score:.2f}). Consider expanding this topic.")
+        if bottom5_articles:
+            worst = bottom5_articles[0]
+            lines.append(f"- Weakest article: {worst.entity_id} (score {worst.score:.2f}). Consider updating or removing.")
+        if top5_pins:
+            best_pin = top5_pins[0]
+            lines.append(f"- Best pin: {best_pin.entity_id} (score {best_pin.score:.2f}). Replicate this style.")
+        lines += [
+            "- Focus on topics with high clicks and low bounce rate.",
+            "- A/B test titles for underperforming articles.",
+            "",
+            "---",
+            f"_Generated by AnalyticsAgent at {now.isoformat()}_",
+        ]
+        content = "\n".join(lines)
+        report = Report(
+            id=report_id,
+            report_type="analytics",
+            period=now.strftime("%Y-%m"),
+        )
+        saved = self._save_report(report, content)
+        return saved
+
+    def _compute_score(self, m: ContentMetrics) -> float:
+        return round(m.views * 0.3 + m.clicks * 0.4 + m.saves * 0.2 + m.avg_time_sec * 0.1, 2)
+
+    def _save_report(self, report: Report, content: str) -> Report:
+        acquired, msg = self.lock_manager.acquire_lock("report", report.id, "analytics_agent")
+        if not acquired:
+            raise RuntimeError(f"Не удалось захватить блокировку: {msg}")
+        try:
+            md_path = Path("Obsidian/Reports") / f"{report.id}_report.md"
+            md_path.parent.mkdir(parents=True, exist_ok=True)
+            md_path.write_text(content, encoding="utf-8")
+            report.data_path = str(md_path)
+            path = write(report, "report")
+            report.obsidian_path = path
+            return report
+        finally:
+            self.lock_manager.release_lock("report", report.id)
