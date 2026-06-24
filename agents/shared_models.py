@@ -154,6 +154,12 @@ class Pin(BaseModel):
 
     board: str
 
+    image_path: Optional[str] = None
+
+    image_url: Optional[str] = None
+
+    media_id: Optional[str] = None
+
     status: str = Field(
         ...,
         pattern=r"^(draft|ready|published|failed)$"
